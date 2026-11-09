@@ -1,0 +1,15 @@
+{
+  "name": "subscription-cost-analyzer",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A browser-only recurring spending and potential savings calculator.",
+  "license": "MIT",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "check": "node --check model.js && node --check app.js",
+    "test": "node --test tests/model.test.js",
+    "test:e2e": "playwright test",
+    "start": "python3 -m http.server 4182 --bind 127.0.0.1"
+  },
+  "devDependencies": { "@playwright/test": "1.65.0" }
+}

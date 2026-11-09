@@ -1,0 +1,10 @@
+node_modules/
+test-results/
+playwright-report/
+.DS_Store
+.env
+.env.*
+*.log
+release/*-desktop.png
+release/*-mobile.png
+release/before-redesign-*/

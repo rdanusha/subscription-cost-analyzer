@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="See your recurring subscription spending and explore potential savings. A free browser-only calculator with one currency per list and no sign-up.">
+  <meta name="theme-color" content="#0d0f17">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Subscription Cost Analyzer">
+  <meta property="og:description" content="See your recurring spending and potential savings. Free, no sign-up, built by rdanusha.">
+  <meta property="og:url" content="https://rdanusha.github.io/subscription-cost-analyzer/">
+  <meta property="og:image" content="https://rdanusha.github.io/subscription-cost-analyzer/social-preview.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://rdanusha.github.io/subscription-cost-analyzer/">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect rx='14' width='64' height='64' fill='%2385e2ba'/%3E%3Ctext x='15' y='45' font-size='42'%3E↻%3C/text%3E%3C/svg%3E">
+  <title>Subscription Cost Analyzer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="model.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a href="#calculator" class="skip-link">Skip to calculator</a>
+  <header class="shell">
+    <div class="title-group"><span class="app-icon" aria-hidden="true">💳</span><div><p class="eyebrow">FREE PERSONAL TOOL</p><h1>Subscription Cost Analyzer</h1><p class="subtitle">See your recurring spending and potential savings.</p></div></div>
+    <div class="header-actions"><span class="privacy-badge"><i aria-hidden="true"></i>No sign-up. No app analytics.</span><button type="button" id="quickAdd" class="primary"><span aria-hidden="true">＋</span> Add subscription</button></div>
+  </header>
+  <main id="calculator" class="shell">
+    <section class="toolbar" aria-label="List settings">
+      <div class="currency-field"><label for="currency">List currency</label><select id="currency" aria-describedby="currencyHelp"><option value="USD">USD · US dollar</option><option value="EUR">EUR · Euro</option><option value="GBP">GBP · British pound</option><option value="CAD">CAD · Canadian dollar</option><option value="AUD">AUD · Australian dollar</option><option value="INR">INR · Indian rupee</option><option value="LKR">LKR · Sri Lankan rupee</option><option value="JPY">JPY · Japanese yen</option></select></div>
+      <div class="toolbar-actions"><button type="button" id="examples" class="secondary">Try examples</button><button type="button" id="deleteData" class="danger">Delete my data</button></div>
+    </section>
+    <p class="help" id="currencyHelp">Use one currency for every entry. No currency conversion.</p>
+    <div id="demoBanner" class="banner demo" hidden><div><strong>Example list, not your saved data.</strong><p>These fictional prices demonstrate the tool. Changes in this mode are not saved.</p></div><button id="exitDemo" type="button" class="secondary">Exit examples</button></div>
+    <p id="storageStatus" class="storage-status" role="status" aria-live="polite"></p>
+    <div id="storageError" class="banner warning" role="status" hidden></div>
+    <section class="summary-grid" aria-label="Spending summary">
+      <div class="summary-card metric-blue"><div class="metric-heading"><p>Monthly average</p><span class="metric-icon" aria-hidden="true">💸</span></div><strong id="monthlyTotal">USD 0.00</strong><span id="countLabel">0 subscriptions</span></div>
+      <div class="summary-card metric-purple"><div class="metric-heading"><p>Yearly projection</p><span class="metric-icon" aria-hidden="true">📅</span></div><strong id="annualTotal">USD 0.00</strong><span>At today's entered prices</span></div>
+      <div class="summary-card savings metric-green"><div class="metric-heading"><p>Potential yearly savings</p><span class="metric-icon" aria-hidden="true">🌱</span></div><strong id="savingsTotal">USD 0.00</strong><span id="plannedLabel">0 marked for consideration</span></div>
+      <div class="summary-card metric-amber"><div class="metric-heading"><p>Monthly after your plan</p><span class="metric-icon" aria-hidden="true">✨</span></div><strong id="remainingTotal">USD 0.00</strong><span>Hypothetical, not a cancellation</span></div>
+    </section>
+    <section class="insights-grid" aria-label="Spending visualizations">
+      <section class="panel category-panel" aria-labelledby="categoryTitle">
+        <div class="chart-heading"><div><h2 id="categoryTitle"><span class="section-icon purple-icon" aria-hidden="true">🍩</span>Spending by category</h2><p class="help">Your monthly average, broken down.</p></div><span class="chart-tag">FULL LIST</span></div>
+        <div class="category-layout">
+          <div id="categoryDonut" class="donut is-empty" role="img" aria-label="No spending to chart."><div class="donut-center"><span class="donut-label">PER MONTH</span><strong id="donutTotal">USD 0.00</strong><span id="donutCount">0 categories</span></div></div>
+          <div id="categoryLegend" class="category-legend"></div>
+        </div>
+        <p class="help chart-footnote">Includes items you're considering cancelling. Shares are rounded.</p>
+      </section>
+      <section class="panel plan-panel" aria-labelledby="planTitle">
+        <div class="chart-heading"><div><h2 id="planTitle"><span class="section-icon green-icon" aria-hidden="true">📊</span>Your spending plan</h2><p class="help">Compare today with your potential plan.</p></div><span id="planPercent" class="plan-percent">0% potential reduction</span></div>
+        <div class="plan-bars">
+          <div class="plan-row"><div class="plan-caption"><span><i class="key-dot current-dot" aria-hidden="true"></i>Current monthly average</span><strong id="currentPlanAmount">USD 0.00</strong></div><div class="plan-track" aria-hidden="true"><div id="planCurrentFill" class="plan-fill current-fill"></div></div></div>
+          <div class="plan-row"><div class="plan-caption"><span><i class="key-dot after-dot" aria-hidden="true"></i>After your plan</span><strong id="afterPlanAmount">USD 0.00</strong></div><div class="plan-track" aria-hidden="true"><div id="planAfterFill" class="plan-fill after-fill"></div></div></div>
+        </div>
+        <div class="savings-callout"><span class="callout-icon" aria-hidden="true">✂️</span><div><span>Potential monthly savings</span><p id="planHint">Mark items in your list to explore savings.</p></div><strong id="planSavings">USD 0.00</strong></div>
+        <p class="help chart-footnote">An illustration, not a cancellation or guaranteed saving.</p>
+      </section>
+    </section>
+    <div class="workspace">
+      <div class="list-column">
+        <section class="panel" aria-labelledby="listTitle">
+          <div class="panel-heading"><div><h2 id="listTitle">Your subscriptions</h2><p class="help">Mark an item to explore savings. Nothing is cancelled.</p></div><button type="button" id="focusAdd" class="primary">+ Add subscription</button></div>
+          <div class="filters"><div><label for="filter">Show</label><select id="filter"><option value="all">All subscriptions</option><option value="planned">Considering cancellation</option></select></div><div><label for="sort">Sort by</label><select id="sort"><option value="cost">Highest cost</option><option value="name">Name</option></select></div></div>
+          <div id="subscriptionList" class="subscription-list"></div>
+          <p id="listNote" class="list-note help"></p>
+        </section>
+
+      </div>
+      <aside class="panel add-panel" aria-labelledby="formTitle">
+        <div class="panel-heading"><h2 id="formTitle">Add subscription</h2><button type="button" id="cancelEdit" class="secondary small" hidden>Cancel edit</button></div>
+        <form id="subscriptionForm" novalidate>
+          <div class="field"><label for="name">Subscription name</label><input id="name" name="name" type="text" maxlength="100" required placeholder="e.g. Video plan" autocomplete="off"></div>
+          <div class="field"><label for="amount">Price per billing period (<span id="amountCurrency">USD</span>)</label><input id="amount" name="amount" type="text" inputmode="decimal" maxlength="16" required placeholder="0.00" aria-describedby="amountHelp"><p id="amountHelp" class="help">Use a dot for decimals, with up to 2 decimal places. Zero is allowed.</p></div>
+          <div class="field"><label for="cycle">Billing period</label><select id="cycle" name="cycle"><option value="monthly">Every month</option><option value="quarterly">Every 3 months</option><option value="annual">Every year</option></select></div>
+          <div class="field"><label for="category">Category</label><select id="category" name="category"><option>Entertainment</option><option>Productivity</option><option value="Health">Health &amp; Fitness</option><option>Utilities</option><option>Learning</option><option>Streaming</option><option>Software &amp; Dev Tools</option><option>Finance</option><option>Business</option><option>News &amp; Media</option><option>Gaming</option><option>Storage &amp; Cloud</option><option>Other</option></select></div>
+          <label class="check-label"><input id="planned" type="checkbox"> <span>I'm considering cancelling this</span></label>
+          <p id="formError" class="error" role="alert"></p>
+          <button id="save" type="submit" class="primary full-width">Add subscription</button>
+        </form>
+        <p class="help form-note">Add only the recurring price. Do not enter passwords, payment details, or account numbers.</p>
+      </aside>
+    </div>
+    <section class="panel information" aria-labelledby="aboutTitle">
+      <h2 id="aboutTitle">How it works &amp; privacy</h2>
+      <details><summary>How the numbers work</summary><p>Yearly cost is the entered price multiplied by 12 for monthly billing, by 4 for quarterly billing, and by 1 for annual billing. Monthly averages are yearly totals divided by 12. Totals are calculated before rounding for display, so rounded row amounts can differ slightly from rounded totals.</p><p>Potential savings assume all marked recurring charges stop for a full year. This is not an immediate refund estimate. Prepaid terms, cancellation fees, notice periods, taxes not included in your price, changing prices, and partial-year billing are not modelled. Check each provider's terms. No subscriptions are cancelled, no bank or provider accounts are connected, and no reminders are sent.</p><p>Each list uses one currency. The selector is locked while the list contains entries so existing amounts cannot be relabelled as another currency. Delete the entries or start an empty list to choose a different currency. This app supports up to 500 subscriptions, each priced from zero to 1,000,000 per billing period.</p></details>
+      <details><summary>Privacy, saving, and deleting data</summary><p>Your own list is automatically saved in this browser's local storage for this site when storage and safe cross-tab coordination are available. It is not uploaded or synced between devices. Anyone using this browser profile may be able to see it. Private browsing, browser cleanup, and storage restrictions can prevent saving or remove entries.</p><p>We do not add analytics or send subscription entries to a server. Hosting providers still receive ordinary page requests and may log connection information. Example mode does not save changes. “Delete my data” replaces this app's saved record with an empty list and default settings, leaving only an anonymous random reset marker to prevent older queued saves from restoring deleted entries. No subscription names, prices, or previous currency remain in that reset record. Other apps' data are not changed. Deletion does not affect any real subscriptions or provider accounts.</p><p>Saving and deletion use an exclusive Web Lock to prevent overlapping tabs from overwriting each other. If this browser cannot coordinate safely, your saved list is read-only, and no deletion is confirmed. Try a supported modern browser on HTTPS or localhost, or clear this site's data through browser settings. Fictional example mode remains available.</p></details>
+    </section>
+    <noscript><p class="error">Enable JavaScript to calculate subscription spending. No account is required.</p></noscript>
+  </main>
+  <footer class="shell"><span>Built by <a href="https://github.com/rdanusha" target="_blank" rel="noopener noreferrer">rdanusha</a></span><span>Free and open source · <a href="https://github.com/rdanusha/subscription-cost-analyzer" target="_blank" rel="noopener noreferrer">Source code</a></span></footer>
+</body>
+</html>
