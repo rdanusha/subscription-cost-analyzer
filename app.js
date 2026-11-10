@@ -18,6 +18,21 @@ const CATEGORY_STYLE = Object.freeze({
   Other: { color: '#2dd4bf', icon: '🧩' },
 });
 const displayCategory = name => CATEGORY_STYLE[name].label || name;
+const FULL_EXAMPLES = Object.freeze([
+  { id: 'demo-video', name: 'Example video plan', category: 'Entertainment', cycle: 'monthly', amount: '12', planned: true },
+  { id: 'demo-cloud', name: 'Example cloud storage', category: 'Utilities', cycle: 'annual', amount: '60', planned: false },
+  { id: 'demo-learning', name: 'Example learning plan', category: 'Learning', cycle: 'quarterly', amount: '24', planned: false },
+  { id: 'demo-productivity', name: 'Example task planner', category: 'Productivity', cycle: 'monthly', amount: '8', planned: false },
+  { id: 'demo-health', name: 'Example fitness membership', category: 'Health', cycle: 'quarterly', amount: '90', planned: false },
+  { id: 'demo-streaming', name: 'Example streaming bundle', category: 'Streaming', cycle: 'monthly', amount: '15', planned: true },
+  { id: 'demo-software', name: 'Example developer tools', category: 'Software & Dev Tools', cycle: 'annual', amount: '120', planned: false },
+  { id: 'demo-finance', name: 'Example budgeting app', category: 'Finance', cycle: 'annual', amount: '48', planned: false },
+  { id: 'demo-business', name: 'Example business workspace', category: 'Business', cycle: 'monthly', amount: '20', planned: false },
+  { id: 'demo-news', name: 'Example news reader', category: 'News & Media', cycle: 'annual', amount: '60', planned: true },
+  { id: 'demo-gaming', name: 'Example gaming pass', category: 'Gaming', cycle: 'quarterly', amount: '30', planned: false },
+  { id: 'demo-storage', name: 'Example photo backup', category: 'Storage & Cloud', cycle: 'annual', amount: '24', planned: false },
+  { id: 'demo-free', name: 'Example free community plan', category: 'Other', cycle: 'monthly', amount: '0', planned: false },
+]);
 const $ = id => document.getElementById(id);
 let ownState = M.newState();
 let state = ownState;
@@ -29,6 +44,7 @@ let editId = null;
 let fallbackId = 0;
 let saved = false;
 let busy = false;
+let viewMode = 'cards';
 const WRITE_LOCK = `${KEY}.write`;
 const hasWriteLock = () => typeof navigator.locks?.request === 'function';
 const lockWarning = 'Not saved: coordinated browser storage requires Web Locks, which are unavailable. Your saved data is protected; this tab is read-only.';
@@ -129,6 +145,7 @@ function render() {
   $('amountHelp').textContent = M.CURRENCIES[state.currency] === 0 ? 'Use whole amounts, without decimals. Zero is allowed.' : 'Use a dot for decimals, with up to 2 decimal places. Zero is allowed.';
   $('demoBanner').hidden = !isDemo;
   $('examples').disabled = busy || isDemo;
+
   $('exitDemo').disabled = busy;
   $('deleteData').disabled = busy;
   $('storageError').hidden = !warning;
@@ -166,7 +183,12 @@ function renderCharts(totals) {
     const name = element('span', 'legend-name', displayCategory(category.name));
     const value = element('strong', 'legend-value', money(category.monthlyMinor));
     const percentage = element('span', 'legend-percent', shareText);
-    row.append(dot, name, value, percentage);
+    const track = element('span', 'legend-track');
+    track.setAttribute('aria-hidden', 'true');
+    const fill = element('span', 'legend-fill');
+    fill.style.width = `${share}%`;
+    track.append(fill);
+    row.append(dot, name, track, value, percentage);
     legend.append(row);
     descriptions.push(`${displayCategory(category.name)}: ${money(category.monthlyMinor)} per month, ${shareText} of yearly spending`);
   }
@@ -190,10 +212,25 @@ function renderCharts(totals) {
 }
 function renderList() {
   const list = $('subscriptionList');
+  list.classList.toggle('list-view', viewMode === 'list');
+  $('gridView').setAttribute('aria-pressed', String(viewMode === 'cards'));
+  $('listView').setAttribute('aria-pressed', String(viewMode === 'list'));
   list.replaceChildren();
   const all = state.subscriptions;
   let filtered = all.filter(sub => $('filter').value !== 'planned' || sub.planned);
-  filtered.sort($('sort').value === 'name' ? (a, b) => a.name.localeCompare(b.name) : (a, b) => M.annualMinor(b, state.currency) - M.annualMinor(a, state.currency));
+  const insertionOrder = new Map(all.map((sub, index) => [sub.id, index]));
+  const alphabetic = (a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' });
+  const sorters = {
+    cost: (a, b) => M.annualMinor(b, state.currency) - M.annualMinor(a, state.currency),
+    'cost-asc': (a, b) => M.annualMinor(a, state.currency) - M.annualMinor(b, state.currency),
+    name: (a, b) => alphabetic(a.name, b.name),
+    'name-desc': (a, b) => alphabetic(b.name, a.name),
+    category: (a, b) => alphabetic(displayCategory(a.category), displayCategory(b.category)),
+    billing: (a, b) => M.CYCLES[b.cycle] - M.CYCLES[a.cycle],
+    planned: (a, b) => Number(b.planned) - Number(a.planned),
+    newest: (a, b) => insertionOrder.get(b.id) - insertionOrder.get(a.id),
+  };
+  filtered.sort(Object.hasOwn(sorters, $('sort').value) ? sorters[$('sort').value] : sorters.cost);
   if (!filtered.length) {
     const empty = element('div', 'empty');
     const illustration = element('span', 'empty-icon', '💳'); illustration.setAttribute('aria-hidden', 'true'); empty.append(illustration);
@@ -283,11 +320,7 @@ $('examples').addEventListener('click', () => {
   if (busy || isDemo) return;
   const currency = ownState.currency;
   isDemo = true;
-  state = M.validateState({ ...M.newState(currency), subscriptions: [
-    { id: 'demo-video', name: 'Example video plan', category: 'Entertainment', cycle: 'monthly', amount: '12', planned: true },
-    { id: 'demo-cloud', name: 'Example cloud storage', category: 'Utilities', cycle: 'annual', amount: '60', planned: false },
-    { id: 'demo-learning', name: 'Example learning plan', category: 'Learning', cycle: 'quarterly', amount: '24', planned: false },
-  ] });
+  state = M.validateState({ ...M.newState(currency), subscriptions: FULL_EXAMPLES });
   resetForm(); $('filter').value = 'all'; render();
 });
 $('exitDemo').addEventListener('click', () => { if (busy) return; isDemo = false; state = ownState; resetForm(); $('filter').value = 'all'; render(); $('examples').focus(); });
@@ -313,6 +346,8 @@ $('deleteData').addEventListener('click', async () => {
   resetForm(); $('filter').value = 'all'; render(); $('storageStatus').textContent = 'This app\'s saved list and settings were deleted from this browser. Real subscriptions are unchanged.'; $('name').focus();
 });
 for (const id of ['filter', 'sort']) $(id).addEventListener('change', renderList);
+$('gridView').addEventListener('click', () => { viewMode = 'cards'; renderList(); });
+$('listView').addEventListener('click', () => { viewMode = 'list'; renderList(); });
 window.addEventListener('storage', event => {
   if ((event.key === KEY || event.key === null) && event.storageArea === localStorage && event.newValue !== lastRaw) {
     locked = true;

@@ -32,4 +32,4 @@ Try it and tell us what would make it more useful.
 - Use `social-preview.png` from this app folder. It is generated from the real interface with fictional examples only.
 - Local desktop/mobile screenshots are under `release/`.
 - Verify the real Facebook link preview after hosting. Its cache is separate from the app's Open Graph metadata.
-- Public repository creation and deployment are pending approval. Publishing to Facebook requires separate authorization.
+- Repository and GitHub Pages publication are approved. Publishing to Facebook requires separate authorization.

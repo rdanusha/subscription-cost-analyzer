@@ -29,7 +29,7 @@
   <main id="calculator" class="shell">
     <section class="toolbar" aria-label="List settings">
       <div class="currency-field"><label for="currency">List currency</label><select id="currency" aria-describedby="currencyHelp"><option value="USD">USD · US dollar</option><option value="EUR">EUR · Euro</option><option value="GBP">GBP · British pound</option><option value="CAD">CAD · Canadian dollar</option><option value="AUD">AUD · Australian dollar</option><option value="INR">INR · Indian rupee</option><option value="LKR">LKR · Sri Lankan rupee</option><option value="JPY">JPY · Japanese yen</option></select></div>
-      <div class="toolbar-actions"><button type="button" id="examples" class="secondary">Try examples</button><button type="button" id="deleteData" class="danger">Delete my data</button></div>
+      <div class="toolbar-actions"><button type="button" id="examples" class="secondary">Try full tour</button><button type="button" id="deleteData" class="danger">Delete my data</button></div>
     </section>
     <p class="help" id="currencyHelp">Use one currency for every entry. No currency conversion.</p>
     <div id="demoBanner" class="banner demo" hidden><div><strong>Example list, not your saved data.</strong><p>These fictional prices demonstrate the tool. Changes in this mode are not saved.</p></div><button id="exitDemo" type="button" class="secondary">Exit examples</button></div>
@@ -64,7 +64,8 @@
       <div class="list-column">
         <section class="panel" aria-labelledby="listTitle">
           <div class="panel-heading"><div><h2 id="listTitle">Your subscriptions</h2><p class="help">Mark an item to explore savings. Nothing is cancelled.</p></div><button type="button" id="focusAdd" class="primary">+ Add subscription</button></div>
-          <div class="filters"><div><label for="filter">Show</label><select id="filter"><option value="all">All subscriptions</option><option value="planned">Considering cancellation</option></select></div><div><label for="sort">Sort by</label><select id="sort"><option value="cost">Highest cost</option><option value="name">Name</option></select></div></div>
+          <div class="view-controls"><span class="help">View</span><div class="view-toggle" role="group" aria-label="Subscription view"><button id="gridView" class="secondary" type="button" aria-pressed="true"><span aria-hidden="true">▦</span> Cards</button><button id="listView" class="secondary" type="button" aria-pressed="false"><span aria-hidden="true">☰</span> List</button></div></div>
+          <div class="filters"><div><label for="filter">Show</label><select id="filter"><option value="all">All subscriptions</option><option value="planned">Considering cancellation</option></select></div><div><label for="sort">Sort by</label><select id="sort"><option value="cost">Monthly cost: high to low</option><option value="cost-asc">Monthly cost: low to high</option><option value="name">Name: A to Z</option><option value="name-desc">Name: Z to A</option><option value="category">Category</option><option value="billing">Billing period: monthly first</option><option value="planned">Considering cancellation first</option><option value="newest">Newest added</option></select></div></div>
           <div id="subscriptionList" class="subscription-list"></div>
           <p id="listNote" class="list-note help"></p>
         </section>

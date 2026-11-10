@@ -6,7 +6,10 @@ const KEY = 'rdanusha.subscription-cost-analyzer.v1';
 const GRAPH_IDS = ['categoryDonut', 'donutTotal', 'categoryLegend', 'currentPlanAmount',
   'afterPlanAmount', 'planSavings', 'planPercent', 'planCurrentFill', 'planAfterFill'];
 const SAMPLE_CATEGORIES = [
-  ['Entertainment', 12, 48], ['Utilities', 5, 20], ['Learning', 8, 32],
+  ['Entertainment', 12, 9], ['Productivity', 8, 6], ['Health', 30, 23],
+  ['Utilities', 5, 4], ['Learning', 8, 6], ['Streaming', 15, 12],
+  ['Software & Dev Tools', 10, 8], ['Finance', 4, 3], ['Business', 20, 16],
+  ['News & Media', 5, 4], ['Gaming', 10, 8], ['Storage & Cloud', 2, 2],
 ];
 test.use({ serviceWorkers: 'block' });
 
@@ -50,7 +53,7 @@ async function expectPlan(page, { current, remaining, savings, percent, currency
   await expect(donut).toHaveAttribute('role', 'img');
   await expect(donut).toHaveAccessibleName(/\S/);
   const label = await donut.getAttribute('aria-label');
-  expect(label).not.toMatch(/NaN|Infinity|undefined/i);
+  expect(label).not.toMatch(/\b(?:NaN|Infinity|undefined)\b/i);
   if (current > 0) expect(label).toMatch(moneyPattern(current, currency));
 }
 
@@ -97,7 +100,7 @@ async function expectNoSpending(page) {
     [null, '::before', '::after'].map(pseudo => getComputedStyle(node, pseudo).backgroundImage));
   expect(backgrounds.join(' ')).not.toMatch(/conic-gradient/i);
   const graphText = await page.locator(GRAPH_IDS.map(id => `#${id}`).join(',')).allTextContents();
-  expect(graphText.join(' ')).not.toMatch(/NaN|Infinity|undefined/i);
+  expect(graphText.join(' ')).not.toMatch(/\b(?:NaN|Infinity|undefined)\b/i);
 }
 
 test.beforeEach(async ({ page, context, baseURL }) => {
@@ -149,13 +152,13 @@ test('Intel background and genuinely empty graphs do not create saved data', asy
 test('mixed-cycle examples plot full category costs and only planned monthly savings', async ({ page }) => {
   await page.locator('#examples').click();
   await idle(page);
-  await expectPlan(page, { current: 25, remaining: 13, savings: 12, percent: 48 });
+  await expectPlan(page, { current: 129, remaining: 97, savings: 32, percent: 25 });
   await expectLegend(page, SAMPLE_CATEGORIES);
   const before = await page.locator('#categoryLegend').innerText();
   const donutLabel = await page.locator('#categoryDonut').getAttribute('aria-label');
   await page.getByRole('checkbox', { name: 'Consider cancelling Example video plan', exact: true }).uncheck();
   await idle(page);
-  await expectPlan(page, { current: 25, remaining: 25, savings: 0, percent: 0 });
+  await expectPlan(page, { current: 129, remaining: 109, savings: 20, percent: 16 });
   await expectLegend(page, SAMPLE_CATEGORIES);
   expect(await page.locator('#categoryLegend').innerText()).toBe(before);
   expect(await page.locator('#categoryDonut').getAttribute('aria-label')).toBe(donutLabel);
@@ -249,18 +252,18 @@ test('example graph mutations and read-only graph interactions preserve the save
   await page.evaluate(() => { window.visualStorageWrites = []; });
   await page.locator('#examples').click();
   await idle(page);
-  await expectPlan(page, { current: 25, remaining: 13, savings: 12, percent: 48 });
+  await expectPlan(page, { current: 129, remaining: 97, savings: 32, percent: 25 });
   await page.getByRole('checkbox', { name: 'Consider cancelling Example video plan', exact: true }).uncheck();
   await idle(page);
   await save(page, { name: 'Unsaved demo fixture', amount: '99', category: 'Other' });
-  await expectPlan(page, { current: 124, remaining: 124, savings: 0, percent: 0 });
+  await expectPlan(page, { current: 228, remaining: 208, savings: 20, percent: 9 });
   await page.getByRole('button', { name: 'Edit Unsaved demo fixture', exact: true }).click();
   await save(page, { name: 'Unsaved demo fixture', amount: '24', category: 'Other', planned: true });
-  await expectPlan(page, { current: 49, remaining: 25, savings: 24, percent: 49 });
+  await expectPlan(page, { current: 153, remaining: 109, savings: 44, percent: 29 });
   page.once('dialog', dialog => dialog.accept());
   await page.getByRole('button', { name: 'Remove Unsaved demo fixture', exact: true }).click();
   await idle(page);
-  await expectPlan(page, { current: 25, remaining: 25, savings: 0, percent: 0 });
+  await expectPlan(page, { current: 129, remaining: 109, savings: 20, percent: 16 });
   await page.locator('#filter').selectOption('planned');
   await page.locator('#sort').selectOption('name');
   await expectLegend(page, SAMPLE_CATEGORIES);
@@ -285,7 +288,7 @@ for (const width of [320, 390, 768, 1440]) {
     await page.locator('#examples').click();
     await idle(page);
     await save(page, { name: 'W'.repeat(100), amount: '1000000', category: 'Other', planned: true });
-    await expectPlan(page, { current: 1000025, remaining: 13, savings: 1000012, percent: 100 });
+    await expectPlan(page, { current: 1000129, remaining: 97, savings: 1000032, percent: 100 });
     const snapshot = await stored(page);
     for (const id of GRAPH_IDS.filter(id => !id.endsWith('Fill'))) {
       const graph = page.locator(`#${id}`);

@@ -4,16 +4,14 @@ Created: 2026-11-09. Built by **rdanusha**.
 
 A free browser-only calculator for recurring subscription spending and hypothetical cancellation savings. This is a separate public-release app inspired by the local Subscription Intel dashboard. The original app and its data are not imported, overwritten, or deleted.
 
-## Status and proposed publication
+## Publication
 
-Ready for publication approval. Independent visual, category, and targeted storage reviews passed with no blocking security or logic findings. All 18 unit tests and 48 browser tests pass in each of Chromium and WebKit, including legacy categories and absent-baseline deletion regressions. No repository or hosted app has been published for this project.
+Publication to the public repository `rdanusha/subscription-cost-analyzer`, GitHub Pages hosting, and the included MIT license is approved. Deployment status is verified separately from local tests.
 
-- Proposed public repository: `rdanusha/subscription-cost-analyzer`
-- Proposed hosting: GitHub Pages
-- Proposed license: MIT, included in `LICENSE`
-- Proposed app URL: https://rdanusha.github.io/subscription-cost-analyzer/
+- Public repository: https://github.com/rdanusha/subscription-cost-analyzer
+- App URL: https://rdanusha.github.io/subscription-cost-analyzer/
 
-The URLs in the share metadata and Facebook draft are release targets, not proof of deployment. Nothing is posted to Facebook automatically.
+The release includes Full Tour as the only fictional example set, Cards and compact List views, and proportional color-matched category bars. Nothing is posted to Facebook automatically.
 
 ## Features
 

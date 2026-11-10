@@ -109,7 +109,7 @@ test('examples do not overwrite, persist, or import the original app data', asyn
   const before = await page.evaluate(key => localStorage.getItem(key), KEY);
   await page.locator('#examples').click();
   await expect(page.locator('#demoBanner')).toBeVisible();
-  await expect(page.locator('#monthlyTotal')).toHaveText(/USD\s25\.00/);
+  await expect(page.locator('#monthlyTotal')).toHaveText(/USD\s129\.00/);
   await page.locator('.subscription-card input[type=checkbox]').first().uncheck();
   await add(page, { name: 'Demo only', amount: '99' });
   expect(await page.evaluate(key => localStorage.getItem(key), KEY)).toBe(before);
@@ -448,7 +448,8 @@ test('sharing image comes from fictional examples and metadata is present', asyn
   await page.locator('#examples').click();
   await page.screenshot({ path: path.join(root, 'social-preview.png'), style: `
     .toolbar, #currencyHelp, #storageStatus, #storageError, .workspace, .information, .header-actions, #exitDemo { display: none !important; }
-    header { padding-top: 20px; padding-bottom: 15px; }
+    header { padding-top: 12px; padding-bottom: 11px; }
+    footer { position: fixed; bottom: 5px; left: 0; right: 0; }
     .demo { padding: 7px 12px; margin: 0 0 12px; }
     .demo p { display: none; }
     .summary-card { padding: 12px 15px; }
@@ -457,6 +458,12 @@ test('sharing image comes from fictional examples and metadata is present', asyn
     .insights-grid { margin-bottom: 0; gap: 16px; }
     .insights-grid .panel { padding: 16px; }
     .category-layout { min-height: 155px; }
+    .category-legend { gap: 3px; }
+    .legend-row { font-size: .64rem; gap: 5px; grid-template-columns: 6px minmax(0, 1.3fr) minmax(32px, 1fr) auto 24px; }
+    .legend-track { grid-column: auto; grid-row: auto; height: 4px; }
+    .legend-value { grid-column: auto; grid-row: auto; font-size: .64rem; }
+    .legend-percent { grid-column: auto; grid-row: auto; font-size: .6rem; }
+    .chart-heading { margin-bottom: 10px; }
     .donut { width: 155px; height: 155px; }
     .donut::before { inset: 17px; }
     .plan-bars { margin: 16px 0; }
